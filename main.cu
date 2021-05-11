@@ -35,7 +35,7 @@ int main() {
 
         printf("Compile time check:\n");
 #if defined(MPIX_CUDA_AWARE_SUPPORT) && MPIX_CUDA_AWARE_SUPPORT
-        printf("This MPI library has CUDA-aware support.\n", MPIX_CUDA_AWARE_SUPPORT);
+        printf("This MPI library has CUDA-aware support.\n");
 #elif defined(MPIX_CUDA_AWARE_SUPPORT) && !MPIX_CUDA_AWARE_SUPPORT
         printf("This MPI library does not have CUDA-aware support.\n");
 #else
@@ -91,6 +91,18 @@ int main() {
 
         CUDA_CHECK_RETURN(cudaDeviceSynchronize());
 
+        int number;
+        std::cout << world_rank << " :cpu send receive \n";
+        if (world_rank == 0) {
+            MPI_Send(&a[5], 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
+        } else if (world_rank == 1) {
+            MPI_Recv(&number, 1, MPI_INT, 0, 0, MPI_COMM_WORLD,
+                     MPI_STATUS_IGNORE);
+            printf("Process 1 received number %d from process 0\n",
+                   number);
+        }
+        MPI_CHECK_RETURN(MPI_Barrier(MPI_COMM_WORLD));
+
         MPI_CHECK_RETURN(MPI_Barrier(MPI_COMM_WORLD));
         std::cout << world_rank << " :check the cpu allgather " << a << "\n";
         MPI_CHECK_RETURN(MPI_Allgather(
@@ -112,6 +124,18 @@ int main() {
 
         MPI_CHECK_RETURN(MPI_Barrier(MPI_COMM_WORLD));
         std::cout << "\n";
+        MPI_CHECK_RETURN(MPI_Barrier(MPI_COMM_WORLD));
+
+
+        std::cout << world_rank << " :GPU send receive \n";
+        if (world_rank == 0) {
+            MPI_Send(&d_a[5], 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
+        } else if (world_rank == 1) {
+            MPI_Recv(&number, 1, MPI_INT, 0, 0, MPI_COMM_WORLD,
+                     MPI_STATUS_IGNORE);
+            printf("Process 1 received number %d from process 0\n",
+                   number);
+        }
         MPI_CHECK_RETURN(MPI_Barrier(MPI_COMM_WORLD));
 
         std::cout << world_rank << " : check the GPU allgather " << d_a << "\t"  << "\n";
