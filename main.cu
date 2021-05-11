@@ -88,6 +88,9 @@ int main() {
         // Transfer data from host to device memory
         CUDA_CHECK_RETURN(cudaMemcpy(d_a, a, sizeof(float) * N, cudaMemcpyHostToDevice));
 
+
+        CUDA_CHECK_RETURN(cudaDeviceSynchronize());
+
         MPI_CHECK_RETURN(MPI_Barrier(MPI_COMM_WORLD));
         std::cout << world_rank << " :check the cpu allgather " << a << "\n";
         MPI_CHECK_RETURN(MPI_Allgather(
@@ -121,7 +124,9 @@ int main() {
                 MPI_INT,                              //type
                 MPI_COMM_WORLD));                     //handle
 
-            CUDA_CHECK_RETURN(cudaMemcpy(a, d_a, sizeof(float) * N, cudaMemcpyDeviceToHost));
+        CUDA_CHECK_RETURN(cudaMemcpy(a, d_a, sizeof(float) * N, cudaMemcpyDeviceToHost));
+        
+        CUDA_CHECK_RETURN(cudaDeviceSynchronize());
 
         for(int i = 0; i < N ; i++) {
             if(a[i] != check[i]){
