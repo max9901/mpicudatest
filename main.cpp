@@ -1,6 +1,6 @@
 #include <iostream>
 #include <mpi.h>
-#include <mpi-ext.h>
+//#include <mpi-ext.h>
 #include "cuda_runtime.h"
 
 #define MPI_CHECK_RETURN(error_code) {                                           \
@@ -107,8 +107,8 @@ int main() {
         MPI_CHECK_RETURN(MPI_Barrier(MPI_COMM_WORLD));
         std::cout << world_rank << " :check the cpu allgather " << a << "\n";
         MPI_CHECK_RETURN(MPI_Allgather(
-                &a[offset],                            //sendbuffer
-                sizedit,                               //sendcount
+                MPI_IN_PLACE,                          //sendbuffer
+                1,                                     //sendcount
                 MPI_INT,                               //type
                 a,                                     //receivebuffer
                 sizedit,                               //recvcount (from any process)
@@ -141,8 +141,8 @@ int main() {
 
         std::cout << world_rank << " : check the GPU allgather " << d_a << "\t"  << "\n";
         MPI_CHECK_RETURN(MPI_Allgather(
-                &d_a[offset],                           //sendbuffer
-                sizedit,                              //sendcount
+                MPI_IN_PLACE,                          //sendbuffer
+                1,                                    //sendcount
                 MPI_INT,                              //type
                 d_a,                                  //receivebuffer
                 sizedit,                              //recvcount (from any process)
